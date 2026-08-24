@@ -5,6 +5,10 @@ export interface Settings {
   userName: string;
   activeWorkspaceId: string;
   launchAtStartup: boolean;
+  /** Full greeting line shown on the Today view. Use the token {name} to insert
+   *  the display name (e.g. "Good morning, {name}."), or write a static line
+   *  with no token at all, e.g. "Failure is the stepping stone to success." */
+  greeting: string;
 }
 
 export interface Workspace {

@@ -47,8 +47,9 @@ Senku is a manager and index of user-provided paths. It is not a file synchroniz
 | Master folder | The single root folder selected by the user, for example `C:\Users\Vivek\btech24-28`. |
 | Managed browsing | Displaying the current Windows file structure beneath the master folder. |
 | Linked path | A file, folder, URL, playlist, repository, or other path attached to a task. |
-| Normal task | A task that produces a reminder only. |
-| Urgent task | A strict task. At its start time it attempts to open every linked path. |
+| Normal and Urgent task | these are task priorities, urgent tasks have highest priority and displaied on top. |
+| Normal Mode | senku works normally except opening linked resources |
+| Strict Mode | senku works normally and open linked resources connected to task |
 | Active task | A task that has not been completed, deleted, or moved to an error state. |
 | Error task | A strict task whose linked resource could not be found or opened. |
 
@@ -144,7 +145,7 @@ Tasks do not require linked files. A task with no links remains a text-only remi
 - Senku shall never copy the linked resource.
 - In normal mode, linked paths are available for manual opening from the task details.
 - In strict mode, Senku shall attempt to open all linked paths.
-- If a strict task cannot find or open a required linked path, Senku shall move the task out of active tasks into error tasks and retain the task metadata.
+- If in strict mode, senku cannot find or open a required linked path, Senku shall move the task out of active tasks into error tasks and retain the task metadata.
 - Error tasks shall preserve their title, schedule, priority, and all linked paths, including the failed resource information. The failure reason shall be visible to the user in the Error task view, not only retained internally.
 - Users shall be able to edit an error task's linked paths and recover it to active tasks; recovery shall reset its one-time start-event marker.
 - Moving a task to error tasks means copying task metadata within Senku's data files, not copying the user resource.

@@ -25,7 +25,7 @@ Everything Senku remembers (workspaces, tasks, settings) lives in local JSON fil
 - Copy-path button for any file or folder
 - Text-first tasks with start time, end time (defaults to 10 years out), and Normal/Urgent priority
 - Optional linked paths per task, one per line, inside or outside the master folder
-- Per-workspace **Strict Mode** toggle, plus Urgent tasks that always open their links regardless of Strict Mode (see below)
+- Per-workspace **Strict Mode** toggle,
 - Windows toast notification at every task's start time, regardless of Strict Mode
 - Snooze for 10 minutes, 1 hour, 1 day, or 1 week
 - Manual completion via **Complete** or the row checkbox
@@ -109,7 +109,6 @@ A task needs no linked paths at all; it stays a plain reminder either way.
 
 | Action | What it does |
 |---|---|
-| **Done** / checkbox | Marks an active task Completed |
 | **Snooze** | Adds 10m / 1h / 1d / 1w to the start time and re-arms the notification |
 | **Reassign** | Archives current progress to Completed, then opens a dialog to schedule the remaining work as a new active task |
 | **Edit** | Changes title, times, priority, or links on an active or error task |
@@ -118,12 +117,11 @@ A task needs no linked paths at all; it stays a plain reminder either way.
 
 Opening a file never marks a task complete automatically — completion is always manual.
 
-## Strict Mode and Urgent tasks
+## Normal Mode
+- **Every task** (Normal or Urgent) sends a Windows notification at its start time. strict mode is extention to normal mode.
 
-- **Every task** (Normal or Urgent) sends a Windows notification at its start time, unconditionally.
-- **Strict Mode is a per-workspace switch.** When it's on, any Normal task with linked paths has all of its links opened automatically at start time.
-- **Urgent tasks always open their linked paths at start time, regardless of the workspace's Strict Mode setting.** Strict Mode only controls whether *Normal* tasks also get this behavior.
-- When Strict Mode is off and a task is Normal, links are never opened automatically — you open them manually from the task (or via the "Open resources" button when the task has links).
+## Strict Mode
+- **Strict Mode is a per-workspace switch.** When it's on, it will open linked resources of task when notified. normal mode only for notification. strict mode is for both notification and opening links.
 
 If a linked path can't be opened for a task that should open it, that task moves to **Error**, keeping its title, schedule, priority, and links — including the one that failed, with the actual failure reason shown in the task card so you know what to fix. Recover it once the link is corrected.
 
