@@ -38,9 +38,7 @@ button { border: 0; color: inherit; cursor: pointer; }
 .nav-item span { width: 15px; color: #99a69b; font-size: 17px; }
 .nav-item b { margin-left: auto; color: #9ca59d; font-size: 10px; font-weight: 700; }
 .sidebar-divider { height: 1px; margin: 28px 12px 24px; background: var(--line); }
-.sidebar-bottom { margin-top: auto; }
 .creator-note { margin: 18px 12px 0; color: #a2aaa1; font: 500 9px 'DM Mono', monospace; letter-spacing: .03em; }
-.strict-card, #workspace-settings { display: none; }
 .main-area { flex: 1; min-width: 0; padding: 45px 5vw 55px; }
 .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 42px; }
 .breadcrumb { margin: 0 0 20px; color: #9ca49d; font: 500 10px 'DM Mono', monospace; }
@@ -140,6 +138,7 @@ button { border: 0; color: inherit; cursor: pointer; }
 .guide-button { width: 100%; margin-top: 11px; padding: 11px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--green); font-size: 10px; font-weight: 800; }
 .guide-button:hover { border-color: var(--green); background: var(--green-pale); }
 .rename-warning { margin: -4px 0 15px; padding: 10px; border-left: 3px solid var(--orange); background: var(--orange-pale); color: #a65e4d; font-size: 10px; line-height: 1.5; }
+.error-reason { margin-top: 6px; padding: 8px 10px; border-left: 3px solid var(--orange); background: var(--orange-pale); color: #a65e4d; font: 500 10px 'DM Mono', monospace; line-height: 1.5; white-space: pre-wrap; }
 .workspace-list { display: grid; gap: 8px; max-height: 260px; margin: 18px 0 22px; overflow: auto; }
 .workspace-option { display: grid; grid-template-columns: 14px 1fr auto; align-items: center; width: 100%; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 7px; background: #f1f3ed; text-align: left; }
 .workspace-option.current { border-color: var(--green); background: var(--green-pale); }

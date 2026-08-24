@@ -2,11 +2,13 @@
 ## Software Requirements Specification
 
 **Product:** Senku
-**Version:** 1.0
+**Version:** 1.1
 **Platform:** Windows desktop
 **Technology direction:** Electron + TypeScript
 **Persistence:** Local files in the user's AppData directory
 **Database:** None
+
+**Revision note (v1.1):** an implementation review found the shipped app did not fully match this spec in a few places — Strict Mode was gating Urgent tasks' links (FR-04), workspace rename was implemented but not exposed in the UI (FR-01), the startup preference was stored but not enforced (FR-11), and Error tasks did not surface their failure reason (FR-05). All four have been corrected in code to match the requirements below, and the requirements have been tightened slightly (see FR-01, FR-05, FR-11) so this drift doesn't reoccur silently. A new section 14 documents packaging assets, which this spec did not previously cover.
 
 ## 1. Purpose
 
@@ -98,7 +100,7 @@ Tasks do not require linked files. A task with no links remains a text-only remi
 
 - Senku shall store multiple workspaces and exactly one active workspace at a time.
 - Each workspace shall contain one master folder, independent settings, and independent task buckets.
-- Senku shall allow the user to create, switch, rename, and delete workspaces.
+- Senku shall allow the user to create, switch, rename, and delete workspaces. Rename shall be reachable from the UI (not only implemented as an internal capability) via a workspace settings view.
 - Deleting a workspace shall delete its Senku metadata and tasks only; it shall never delete the Windows master folder. The last workspace may be deleted, returning the app to setup.
 - The path shall be normalized before comparison and storage.
 - Browser paths shall be accepted only when they are inside the configured master folder.
@@ -126,12 +128,12 @@ Tasks do not require linked files. A task with no links remains a text-only remi
 
 ### FR-04 Task priority and strict mode
 
-- Normal tasks shall issue a Windows reminder notification.
-- Urgent tasks shall issue a Windows notification and open every linked path at the start event regardless of Strict Mode.
-- When Strict Mode is enabled, Normal tasks with linked paths shall also open those paths at their start event.
-- When Strict Mode is disabled, Normal tasks shall remain reminder-only.
+- Normal and Urgent tasks shall both issue a Windows reminder notification at their start event; priority only changes the notification's wording (e.g. an "Urgent" label), not whether linked paths are opened.
+- Strict Mode is the sole control for automatically opening a task's linked paths at its start event, and it applies equally to Normal and Urgent tasks. Priority shall never bypass or override the workspace's Strict Mode setting.
+- When Strict Mode is enabled, any task (Normal or Urgent) with linked paths shall have those paths opened at its start event.
+- When Strict Mode is disabled, no task opens its linked paths automatically, regardless of priority; the user opens them manually from the task.
 - Senku shall remember the previous Strict Mode choice after restart.
-- An urgent task without linked paths shall behave as a reminder and shall not fail solely because it has no links.
+- A task without linked paths shall behave as a reminder and shall not fail solely because it has no links.
 - The implementation shall avoid opening the same task repeatedly after it has handled its start event.
 
 ### FR-05 Linked paths
@@ -143,7 +145,7 @@ Tasks do not require linked files. A task with no links remains a text-only remi
 - In normal mode, linked paths are available for manual opening from the task details.
 - In strict mode, Senku shall attempt to open all linked paths.
 - If a strict task cannot find or open a required linked path, Senku shall move the task out of active tasks into error tasks and retain the task metadata.
-- Error tasks shall preserve their title, schedule, priority, and all linked paths, including the failed resource information.
+- Error tasks shall preserve their title, schedule, priority, and all linked paths, including the failed resource information. The failure reason shall be visible to the user in the Error task view, not only retained internally.
 - Users shall be able to edit an error task's linked paths and recover it to active tasks; recovery shall reset its one-time start-event marker.
 - Moving a task to error tasks means copying task metadata within Senku's data files, not copying the user resource.
 
@@ -209,7 +211,7 @@ The default task area shall emphasize tasks relevant to today while keeping othe
 
 ### FR-11 Startup and power usage
 
-- Senku shall provide an option to start with Windows.
+- Senku shall provide an option to start with Windows. The stored preference shall be read and applied both when the app launches and immediately when the user changes it — a stored value that is never enforced does not satisfy this requirement.
 - Recommended default behavior is launch minimized to the system tray.
 - The main window shall open when the user selects the tray icon or otherwise launches Senku.
 - The task engine shall use a lightweight timer with a one-minute maximum polling interval.
@@ -378,3 +380,10 @@ A completed record shall retain at least:
 - A strict task with multiple links is considered successful only when all required links are opened successfully. Any failed link moves the task metadata to Error and records the failure.
 - A URL or other external resource is stored as a link. The main process decides whether it can be opened using a controlled shell/open API.
 - Changing the master folder changes browsing scope only; existing external task links remain unchanged.
+
+## 14. Packaging assets
+
+- The Windows build shall ship with a real application/installer icon at `assets/senku.ico`, containing at minimum the 16, 32, 48, 64, 128, and 256 pixel sizes, so Windows can pick the correct resolution for the taskbar, Start menu, installer, and file explorer.
+- The system tray icon shall use a real image (the same mark as the app icon, resized as appropriate), not an empty/blank image.
+- An in-app user guide shall be bundled at `assets/Senku-User-Guide.pdf` and reachable from the profile view via a "Read the Senku guide" action. The guide shall describe first launch, workspaces, tasks and their actions, Strict Mode/Urgent behavior exactly as implemented, error recovery, and where local data is stored.
+- Both assets are packaging-time requirements: `electron-builder --win` shall fail fast if `assets/senku.ico` is missing rather than silently producing an unbranded build.

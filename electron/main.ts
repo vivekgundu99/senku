@@ -57,7 +57,7 @@ async function runTaskEngine(): Promise<void> {
       if (!task.startEventHandled && Date.now() >= Date.parse(task.startAt)) {
         task.startEventHandled = true; task.updatedAt = new Date().toISOString(); changed = true;
         new Notification({ title: task.priority === 'urgent' ? `Urgent · ${workspace.name}` : `Reminder · ${workspace.name}`, body: task.title }).show();
-        if (workspace.strictMode && task.linkedPaths.length) {
+        if ((workspace.strictMode) && task.linkedPaths.length) {
           const failures: string[] = [];
           for (const linkedPath of task.linkedPaths) { const error = await shell.openPath(linkedPath); if (error) failures.push(`${linkedPath}: ${error}`); }
           if (failures.length) { failed.push({ ...task, errorMessage: failures.join('\n') }); continue; }
@@ -77,13 +77,13 @@ async function createWindow(): Promise<void> {
   mainWindow.on('close', (event) => { if (tray && !isQuitting) { event.preventDefault(); mainWindow?.hide(); } }); mainWindow.once('ready-to-show', () => { if (!app.isPackaged) showMainWindow(); });
 }
 
-app.whenReady().then(async () => { Menu.setApplicationMenu(null); app.setLoginItemSettings({ openAtLogin: true, openAsHidden: false }); await createWindow(); tray = new Tray(nativeImage.createEmpty()); tray.setToolTip('Senku'); tray.setContextMenu(Menu.buildFromTemplate([{ label: 'Open Senku', click: showMainWindow }, { label: 'Quit', click: () => { isQuitting = true; app.quit(); } }])); tray.on('click', showMainWindow); timer = setInterval(() => void runTaskEngine(), 60_000); void runTaskEngine(); });
+app.whenReady().then(async () => { Menu.setApplicationMenu(null); const startupSettings = await getSettings(); app.setLoginItemSettings({ openAtLogin: startupSettings.launchAtStartup, openAsHidden: true }); await createWindow(); const trayIcon = nativeImage.createFromPath(path.join(app.getAppPath(), 'assets', 'senku.ico')).resize({ width: 16, height: 16 }); tray = new Tray(trayIcon); tray.setToolTip('Senku'); tray.setContextMenu(Menu.buildFromTemplate([{ label: 'Open Senku', click: showMainWindow }, { label: 'Quit', click: () => { isQuitting = true; app.quit(); } }])); tray.on('click', showMainWindow); timer = setInterval(() => void runTaskEngine(), 60_000); void runTaskEngine(); });
 app.on('before-quit', () => { isQuitting = true; if (timer) clearInterval(timer); });
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 
 ipcMain.handle('folder:choose', async () => { const result = await dialog.showOpenDialog({ properties: ['openDirectory'] }); return result.canceled ? null : result.filePaths[0]; });
 ipcMain.handle('app:get-snapshot', (_event, requestedPath?: string) => snapshot(requestedPath));
-ipcMain.handle('settings:save', async (_event, settings: Settings) => { await writeJson(settingsFile(), settings); return snapshot(); });
+ipcMain.handle('settings:save', async (_event, settings: Settings) => { await writeJson(settingsFile(), settings); app.setLoginItemSettings({ openAtLogin: settings.launchAtStartup, openAsHidden: true }); return snapshot(); });
 ipcMain.handle('workspace:create', async (_event, name: string, masterFolder: string) => { const stats = await fs.stat(masterFolder).catch(() => null); if (!stats?.isDirectory()) throw new Error('Master folder does not exist.'); const workspace: Workspace = { id: randomUUID(), name: name.trim(), masterFolder: path.resolve(masterFolder), lastSubfolder: path.resolve(masterFolder), strictMode: false, createdAt: new Date().toISOString() }; await writeJson(workspacesFile(), [...await getWorkspaces(), workspace]); await writeJson(settingsFile(), { ...(await getSettings()), activeWorkspaceId: workspace.id }); return snapshot(); });
 ipcMain.handle('workspace:switch', async (_event, id: string) => { await writeJson(settingsFile(), { ...(await getSettings()), activeWorkspaceId: id }); return snapshot(); });
 ipcMain.handle('workspace:rename', async (_event, id: string, name: string) => { const workspaces = await getWorkspaces(); const workspace = getWorkspace(workspaces, id); if (!workspace || !name.trim()) throw new Error('Workspace name is required.'); workspace.name = name.trim(); await writeJson(workspacesFile(), workspaces); return snapshot(); });
